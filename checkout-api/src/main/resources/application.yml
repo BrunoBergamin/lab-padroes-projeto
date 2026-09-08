@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: checkout-api
+  datasource:
+    url: jdbc:h2:mem:checkout;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+springdoc:
+  swagger-ui:
+    path: /docs
+    operations-sorter: method
+
+# Valores entre aspas de proposito: sem elas o YAML le como double e o BigDecimal
+# chega arredondado (R$ 50.0 em vez de R$ 50.00) nas mensagens e nas contas.
+checkout:
+  pedido-minimo: "50.00"
+  frete-gratis-a-partir-de: "299.00"
+  cashback:
+    percentual: "0.05"
+    teto: "30.00"
+
+logging:
+  level:
+    br.com.bergamin.checkout: INFO
