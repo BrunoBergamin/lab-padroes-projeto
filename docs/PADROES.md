@@ -216,9 +216,25 @@ catch (RuntimeException e) { failures.add(...); }
 ```java
 events.publishEvent(new CheckoutCompletedEvent(...));   // no service
 
-@EventListener
+@TransactionalEventListener(phase = AFTER_COMMIT)
 public void on(CheckoutCompletedEvent event) { ... }     // em AuditLogListener
 ```
+
+**Por que `@TransactionalEventListener` e não o `@EventListener` simples?** Esse é o detalhe que
+mais gente erra ao trocar o EventBus da mão pelo do Spring. O `@EventListener` comum é **síncrono e
+roda dentro da transação** do checkout. Duas consequências ruins:
+
+- se o pedido der rollback depois, o cliente já recebeu o e-mail de um pedido que não existe;
+- se o listener lançar exceção, ele **derruba a transação** — ou seja, o SMS cair cancela a venda.
+
+Com `AFTER_COMMIT`, o aviso só sai depois que o banco confirmou. E o `CustomerNoticeListener` ainda
+envolve cada canal em `try/catch`, exatamente como o `EventBus` do módulo puro faz — porque avisar
+o cliente é **efeito colateral**, não parte da transação. Isso está provado em `NoticeFailureTest`:
+um canal que sempre quebra entra no contexto e o pedido fecha do mesmo jeito.
+
+Detalhe para não cair em pegadinha: `@TransactionalEventListener` **não dispara** se não houver
+transação aberta no momento da publicação (a menos que se use `fallbackExecution = true`). Aqui
+sempre há, porque o `checkout()` é `@Transactional`.
 
 **Sem ele.** O serviço de checkout com `emailService`, `smsService`, `auditService` e `erpService`
 injetados — e um teste de checkout que precisa de mock para quatro coisas que não têm a ver com

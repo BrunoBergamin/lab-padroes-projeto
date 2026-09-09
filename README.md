@@ -20,7 +20,7 @@ Comparar os dois é o ponto do projeto: o padrão não desaparece com o Spring, 
 Precisa de **JDK 21+** (testado no 25). O Maven vem junto pelo wrapper.
 
 ```bash
-# 1) roda os testes dos dois módulos (61 testes)
+# 1) roda os testes dos dois módulos (62 testes)
 ./mvnw test
 
 # 2) demo do módulo Java puro: imprime um checkout inteiro no console
@@ -94,7 +94,7 @@ os dois módulos) está em **[docs/PADROES.md](docs/PADROES.md)**. Resumo:
 | **Chain of Responsibility** | Várias validações independentes antes de fechar | `rules/CheckoutRule.java` | `rules/` + `@Order` |
 | **Decorator** | Descontos que se acumulam em cima do preço | `pricing/PriceDecorator.java` | `pricing/PriceAssembler.java` |
 | **Facade** | Uma porta de entrada para um processo de 6 etapas | `CheckoutFacade.java` | `checkout/CheckoutService.java` |
-| **Observer** | Avisar e-mail/SMS/auditoria sem o checkout saber deles | `events/EventBus.java` | `@EventListener` |
+| **Observer** | Avisar e-mail/SMS/auditoria sem o checkout saber deles | `events/EventBus.java` | `@TransactionalEventListener` |
 | **Template Method** | Todo aviso segue o mesmo roteiro, muda o canal | `notification/Notifier.java` | `notification/Notifier.java` |
 | **State** | Pedido só aceita as transições que fazem sentido | `order/state/` | `order/OrderStatus.java` |
 | **Adapter** | Falar com a API velha do banco sem sujar o domínio | — | `payment/` |
@@ -154,7 +154,7 @@ cupom → frete grátis acima de R$ 299 → cashback de 5% (teto de R$ 30) para 
 
 ```
 patterns-core   28 testes
-checkout-api    33 testes  (11 da fachada, 8 da API via MockMvc, 14 unitários)
+checkout-api    34 testes  (12 da fachada e dos eventos, 8 da API via MockMvc, 14 unitários)
 ```
 
 Cada teste tem um `@DisplayName` em português dizendo **qual padrão** ele está exercitando —
